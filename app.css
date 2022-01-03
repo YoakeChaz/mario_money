@@ -1,0 +1,51 @@
+#app{
+    width: 650px;
+    height: 650px;
+    position:absolute;  
+}
+
+.win_point {
+        top: 30px;
+        left: 50px;
+        position: absolute;
+        font-size: 30px;
+        z-index: 10;  //這是Ｚ軸 也就是圖層堆疊
+        
+    }
+
+.hp_bar{
+    position:absolute; 
+    z-index: 10;
+    font-size: 20px;
+    left: 430px;
+    top: 30px;
+}
+
+.hp_box{
+    position:absolute; 
+    top: 35px;
+    left: 75px;
+    width:100px;
+    height:30px;
+    background-color:black
+}
+
+.hp{
+    width:100px;
+    height:30px;
+    background-color:crimson
+}
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    background-color: bisque
+}

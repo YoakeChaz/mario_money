@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<!--
+	NOTES:
+	1. All tokens are represented by '$' sign in the template.
+	2. You can write your code only wherever mentioned.
+	3. All occurrences of existing tokens will be replaced by their appropriate values.
+	4. Blank lines will be removed automatically.
+	5. Remove unnecessary comments before creating your template.
+-->
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="authoring-tool" content="Adobe_Animate_CC">
+<title>mario</title>
+<!-- write your code here -->
+<script src="https://code.createjs.com/1.0.0/createjs.min.js"></script> 
+<script src="./ndgmr.Collision.js"></script>   <!-- 載入碰撞包 -->
+<script src="mario.js?1640908792321"></script> 
+<link rel="stylesheet" href="app.css"> 
+<script>
+var canvas, stage, exportRoot, anim_container, dom_overlay_container, fnStartAnimation;
+function init() {
+	canvas = document.getElementById("canvas");
+	anim_container = document.getElementById("animation_container");
+	dom_overlay_container = document.getElementById("dom_overlay_container");
+	var comp=AdobeAn.getComposition("C567CB83374C47D68FBC6278F8719CAC");
+	var lib=comp.getLibrary();
+	var loader = new createjs.LoadQueue(false);
+	loader.addEventListener("fileload", function(evt){handleFileLoad(evt,comp)});
+	loader.addEventListener("complete", function(evt){handleComplete(evt,comp)});
+	var lib=comp.getLibrary();
+	loader.loadManifest(lib.properties.manifest);
+}
+function handleFileLoad(evt, comp) {
+	var images=comp.getImages();	
+	if (evt && (evt.item.type == "image")) { images[evt.item.id] = evt.result; }	
+}
+function handleComplete(evt,comp) {
+	//This function is always called, irrespective of the content. You can use the variable "stage" after it is created in token create_stage.
+	var lib=comp.getLibrary();
+	var ss=comp.getSpriteSheet();
+	var queue = evt.target;
+	var ssMetadata = lib.ssMetadata;
+	for(i=0; i<ssMetadata.length; i++) {
+		ss[ssMetadata[i].name] = new createjs.SpriteSheet( {"images": [queue.getResult(ssMetadata[i].name)], "frames": ssMetadata[i].frames} )
+	}
+	exportRoot = new lib.mario();
+	stage = new lib.Stage(canvas);	
+	
+    
+    
+    
+    
+    
+    
+    ////////////////////////////////////////////////////////////////////////////////////
+    var mario_hito = new lib.mario_hito();
+    mario_hito.x = 317;
+    mario_hito.y = 391;
+    exportRoot.addChild(mario_hito);
+    //////////////////////////////////////////////////////////////////////////////////// 
+    window.addEventListener("keydown",keydownFn)
+    window.addEventListener("keyup",keyupFn)
+    createjs.Ticker.addEventListener("tick",tickFn)
+    ////////////////////////////////////////////////////////////////////////////////////
+    var win_point = 0
+    var hito_direction = 1;
+    var contii = 0;
+    var hito_hp = 100;
+    const ATTACK =25;
+    const SPEED = 20;
+    function keydownFn(e){
+        console.log(e.keyCode);
+        contii = 1;
+        mario_hito.gotoAndPlay("run");
+        if(e.keyCode==39){
+            hito_direction = 1;
+            mario_hito.scaleX = 1;
+        }
+        if(e.keyCode==37){
+            hito_direction = -1;
+            mario_hito.scaleX = -1;
+        }
+    }
+    function keyupFn(e){
+        contii = 0;
+        mario_hito.gotoAndPlay("stop");
+    }
+    
+    function tickFn(){    //要隨時判斷狀態的動作要集中在這裡 才會精準
+        if(hito_direction==1 && contii==1 && mario_hito.x <= 600){
+            mario_hito.x += SPEED
+        }
+            
+        if(hito_direction==-1 && contii==1 && mario_hito.x >= 20){
+            mario_hito.x -= SPEED
+        } 
+        
+        if(hito_hp<=0){
+            clearInterval(time_coin);
+            createjs.Ticker.removeEventListener("tick",tickFn);
+            mario_hito.gotoAndPlay("boom");
+        }
+    }   
+    ////////////////////////////////////////////////////////////////////////////////////
+    var footer = new lib.footer(); 
+    footer.x = 0;
+    footer.y = 407;  
+    footer.scaleX = 1.5;
+    exportRoot.addChildAt(footer,2);//階層2
+    
+    let time_coin = setInterval(() => { //這邊命名是因為後面要停止他 需要有名字
+        var coin = new lib.coin(); 
+        coin.x = (Math.random()*(620-30+1)+10);
+        coin.y = -50;
+        
+        exportRoot.addChildAt(coin,1);//階層1
+        //console.log(coin.x);
+        
+        createjs.Tween.get(coin)
+            .to({y:500},3000)
+            .call(handleComplete)
+            .addEventListener("change",()=>{
+                let hit = ndgmr.checkRectCollision(coin,mario_hito)
+                if(hit){
+                    exportRoot.removeChild(coin);
+                    createjs.Tween.removeTweens(coin);
+                    win_point +=1;
+                    //下一步 .win_point的這組    渲染成   變數win_point
+                    document.querySelector(".win_point").innerHTML=win_point
+                }
+            })
+            //.call(handleComplete);    //動畫完成後call 下面的function
+
+            function handleComplete(){
+                console.log("沒吃到");
+                exportRoot.removeChild(coin);
+                hito_hp = hito_hp - ATTACK;
+                document.querySelector(".hp").style.width = `${hito_hp}%`; //這邊用比例去伸縮
+                //console.log(hito_hp-ATTACK);
+                if(hito_hp<=0){
+                    window.removeEventListener("keydown",keydownFn);
+                    window.removeEventListener("keyup",keyupFn);
+                    createjs.Ticker.removeEventListener("tick",tickFn);
+                }
+                
+            }
+        
+    }, 1000);
+    
+    
+    
+    
+    
+    
+    
+    
+	fnStartAnimation = function() {
+		stage.addChild(exportRoot);
+		createjs.Ticker.framerate = lib.properties.fps;
+		createjs.Ticker.addEventListener("tick", stage);
+	}	    
+	//Code to support hidpi screens and responsive scaling.
+	AdobeAn.makeResponsive(false,'both',false,1,[canvas,anim_container,dom_overlay_container]);	
+	AdobeAn.compositionLoaded(lib.properties.id);
+	fnStartAnimation();
+}
+</script>
+<!-- write your code here -->
+</head>
+    
+<body onload="init();" style="margin:0px;">   <!-- 這邊是控制網頁的外觀 -->
+	<div id="app">
+        
+        <h1 class="win_point">0</h1>  <!-- class是選擇器 -->
+        
+        <div class="hp_bar">
+            <h2>HP</h2>
+            <div class=hp_box>
+                <div class="hp"></div>
+            </div>
+        </div>
+        
+        <div id="animation_container" style="background-color:rgba(255, 255, 255, 1.00); width:640px; height:480px">
+            <canvas id="canvas" width="640" height="480" style="position: absolute; display: block; background-color:rgba(255, 255, 255, 1.00);"></canvas>
+            <div id="dom_overlay_container" style="pointer-events:none; overflow:hidden; width:640px; height:480px; position: absolute; left: 0px; top: 0px; display: block;">
+            </div>
+	    </div>
+    </div>
+</body>
+</html>
