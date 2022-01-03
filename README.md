@@ -3,4 +3,4 @@
 
 碰撞套件 ： http://indiegamr.com/easeljs-pixel-perfect-collision-detection-for-bitmaps-with-alpha-threshold/  
 
-使用工具 ： 
+使用工具 ： adobe animate 
